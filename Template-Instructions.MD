@@ -61,7 +61,7 @@ En la carpeta target/output se generarán automáticamente los siguientes archiv
 
 En la carpeta target/asm se copiarán todos los archivos necesarios para correr el programa fuente final, incluyendo el final.asm generado.
 La carpeta target/asm contiene la herramienta DOSBox, junto con el ensamblador y el linker.
-En ella encontrará un archivo assembler de ejemplo y un README con instrucciones de cómo correrlo.
+En ella encontrará un archivo assembler de ejemplo y un [README](src/main/resources/asm/readme.MD) con instrucciones de cómo correrlo.
 La misma también contiene el script run.bat que ejecutará el programa generado por su compilador.
 
 ## Tests:
