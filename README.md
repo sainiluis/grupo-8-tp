@@ -146,6 +146,7 @@ Nota: Los comentarios se ignoran, de manera que no generan un componente léxico
 Las salidas y entradas por teclado se implementarán como se muestra en el siguiente ejemplo:
 
 [Ejemplo Entrada](src/test/resources/read.txt)
+
 [Ejemplo Salida](src/test/resources/write.txt)
 
 
@@ -154,7 +155,9 @@ Las condiciones para un constructor de ciclos o de selección pueden ser simples
 Las condiciones múltiples pueden ser hasta dos condiciones simples ligadas a través del operador lógico (AND, OR) o una condición simple con el operador lógico NOT
 
 [Ejemplo AND](src/test/resources/and.txt)
+
 [Ejemplo OR](src/test/resources/or.txt)
+
 [Ejemplo NOT](src/test/resources/not.txt)
 
 
