@@ -38,7 +38,7 @@ La entrega 1.0.0 incluirá:
 Nota: Los archivos requeridos ya son provistos/generados por la plantilla, lo que debe agregarse es la implementación de la funcionalidad en ellos.
 
 ##### Criterio de aprobación:
-`- Todos los casos de prueba escritos en LexerTest y ParserTest deberán pasar.
+- Todos los casos de prueba escritos en LexerTest y ParserTest deberán pasar.
 - La tabla de símbolos debe generarse respetando la estructura descrita en la consigna.
 
 Envíe el enlace del repositorio generado enviado a: lenguajesycompiladores@gmail.com
