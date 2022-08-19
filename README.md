@@ -42,7 +42,9 @@ Nota: Los archivos requeridos ya son provistos/generados por la plantilla, lo qu
 - La tabla de símbolos debe generarse respetando la estructura descrita en la consigna.
 
 Envíe el enlace del repositorio generado enviado a: lenguajesycompiladores@gmail.com
+
 Asunto: NombredelDocente_GrupoXX (Ej Daniel_Grupo03, Eleazar_Grupo02, Facundo_Grupo15)
+
 Fecha de entrega: 19/09/2022
 
 
@@ -69,7 +71,9 @@ Nota: Los archivos requeridos ya son provistos/generados por la plantilla, lo qu
 
 
 Envíe el enlace del repositorio generado enviado a: lenguajesycompiladores@gmail.com
+
 Asunto: NombredelDocente_GrupoXX    (Ej Daniel_Grupo03, Eleazar_Grupo02)
+
 Fecha de entrega: 24/10/2022
 
 ### Entrega final
@@ -97,7 +101,9 @@ Nota: Los archivos requeridos ya son provistos/generados por la plantilla, lo qu
 - El programa de prueba debe ejecutarse sin problemas en DOSBox.
 
 Envíe el enlace del repositorio generado enviado a: lenguajesycompiladores@gmail.com
+
 Asunto: NombredelDocente_GrupoXX    (Ej Daniel_Grupo03, Eleazar_Grupo02)
+
 Fecha de entrega: 07/11/2022
 
 ## Temas comunes
