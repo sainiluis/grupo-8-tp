@@ -122,7 +122,7 @@ Fecha de entrega: 07/11/2022
 
 [Ejemplo](src/test/resources/assignments.txt)
 
-## Declaración de variables
+### Declaración de variables
 Todas las variables deberán ser declaradas dentro de un bloque especial para ese fin,
 delimitado por la palabra reservada init dentro de un bloque delimitado por llaves.
 
