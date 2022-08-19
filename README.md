@@ -1,4 +1,4 @@
-# Trabajo Práctico Compilador de Lenguajes y Compiladores
+# Trabajo Práctico Integrador de Lenguajes y Compiladores
 
 ## Consideraciones Generales
 
