@@ -173,10 +173,63 @@ Los atributos portan información necesaria para operar con constantes, variable
 
 ![symbol-table.png](images/symbol-table.png)
 
+## Temas especiales
+ 
+### #Iguales
+Esta función del lenguaje tomará como entrada una expresión (pivot)  y una lista de expresiones. Devolverá la cantidad de elementos iguales al pivot que se encuentran en la lista. La cantidad de listas es indefinida.
 
-## Instrucciones para uso de la Plantilla
+**Ejemplo:**
+
+`#Iguales ( a+w/b, [(d-3)*2,e,f] )  = 2 si  (a+w/b = (d-3)*2 ) & (a+w/b =f) & (a+w/b ≠ e)`
+
+### AllEqual
+Esta función del lenguaje tomará como entrada dos a más listas de expresiones y devolverá verdadero si cada elemento en orden posicional es igual a su par correspondiente en cada   una de las listas. Caso contrario: Falso. La cantidad de listas es indefinida.
+
+**Ejemplo:**
+
+`AllEqual ( [a+w,b,c], [(d-3)*2,e,f], [g,h,i] )  es True si (a+w = (d-3)*2 = g) & (b = e = h) & (c=f=i)
+`
+
+### Case
+Se deberá implementar la sentencia DO CASE con la última cláusula DEFAULT, que será opcional
+Ejemplo:
+
+```
+DO a
+CASE a=101
+…
+CASE a>202
+…
+DEFAULT ## opcional
+ENDDO
+
+```
+### Repeat Inline
+
+Esta función del lenguaje repetirá un conjunto de una o más sentencias [sentencias, la cantidad de veces indicada por la constante entera ctentera
+
+`REPEAT ctentera [sentencias]
+`
+
+## Instrucciones para uso de la Plantilla JAVA
 
 Para entender cómo usar esta plantilla, lea [estas instrucciones](Template-Instructions.MD).
+
+
+## ¿Puedo usar otro lenguaje para el Trabajo Práctico?
+
+Si bien la cátedra provee material y recursos para desarrollar el TP en JAVA, estamos abierto al uso de otras
+tecnologías.
+
+Probablemente, el uso de otras herramientas requerirá un trabajo de investigación adicional al grupo/equipo que así lo decida, y mayor
+autonomía en las particularidades de implementación (dado que los docentes no conocemos todas las herramientas y no podremos dar soporte
+a cada una de ellas).
+
+De igual forma, el esfuerzo de investigación de otras herramientas será tenido en cuenta positivamente en la evaluación definitiva.
+
+Dejamos a continuación, links útiles para implementar un compilador en otros lenguajes: 
+
+[(Plantilla para TP Integrador usando Flex y Bison - C)](https://github.com/Lenguajes-y-Compiladores-UnLaM/compiler-c)
 
 
 
