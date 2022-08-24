@@ -49,7 +49,7 @@
       <id>Run</id>
       <activation>
         <property>
-          <name>run.compiler</name>
+          <name>run-compiler</name>
         </property>
         <activeByDefault>false</activeByDefault>
       </activation>

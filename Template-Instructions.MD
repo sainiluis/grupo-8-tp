@@ -34,13 +34,13 @@ Abrir una terminal en el directorio raíz del proyecto y correr el siguiente com
 
 Para Linux/Mac:
 ```
-./mvnw clean install -Drun.compiler
+./mvnw clean install -Drun-compiler
 ```
 
 
 Para Windows:
 ```
-./mvnw.cmd clean install -Drun.compiler
+./mvnw.cmd clean install -Drun-compiler
 ```
 
 Dicho comando compilará el proyecto y luego correrá el script run.sh o run.bat (Para Unix o Windows respectivamente) presente en el directorio raíz.
