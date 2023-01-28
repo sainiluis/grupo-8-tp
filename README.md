@@ -7,7 +7,7 @@ Para poder usar esta plantilla deberá instalar:
 
 ### Instalación en Windows
 1. Bajarse [Windows x64 Installer](https://www.oracle.com/java/technologies/javase/jdk18-archive-downloads.html)
-2. Setear JAVA_HOME como variable de entorno en variables del sistema (https://docs.oracle.com/cd/E19182-01/821-0917/inst_jdk_javahome_t/index.html#:~:text=To%20set%20JAVA_HOME%2C%20do%20the,Program%20Files%5CJava%5Cjdk1.)
+2. Setear JAVA_HOME como variable de entorno en variables del sistema ([Instructivo](https://docs.oracle.com/cd/E19182-01/821-0917/inst_jdk_javahome_t/index.html#:~:text=To%20set%20JAVA_HOME%2C%20do%20the,Program%20Files%5CJava%5Cjdk1.))
 3. Corroborar que JAVA_HOME fue seteado correctamente abriendo la terminal de símbolos del sistema (command prompt) ejecuntando el siguiente comando:
 ```
 echo %JAVA_HOME%
