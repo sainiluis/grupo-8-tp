@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static com.google.common.truth.Truth.assertThat;
+import static lyc.compiler.Constants.EXAMPLES_ROOT_DIRECTORY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Disabled
@@ -90,9 +92,9 @@ public class ParserTest {
     }
 
     private String readFromFile(String fileName) throws IOException {
-        InputStream resource = getClass().getResourceAsStream("/%s".formatted(fileName));
-        assertThat(resource).isNotNull();
-        return IOUtils.toString(resource, StandardCharsets.UTF_8);
+        URL url = new URL(EXAMPLES_ROOT_DIRECTORY + "/%s".formatted(fileName));
+        assertThat(url).isNotNull();
+        return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
     }
 
 
