@@ -1,11 +1,34 @@
 package lyc.compiler;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import java_cup.runtime.*;
+import lyc.compiler.symbol_table.*;
+import lyc.compiler.model.*;
+
 
 class Parser;
 
+action code
+{:
+    public SymbolTableManager symbolTableManager = new SymbolTableManager();
+    public ArrayList<Simbolo> listaSimbolos = new ArrayList<>();
+    public int cantidadElementos = 0;
+    public int index = 0;
+:}
+
+parser code
+{:
+    public ArrayList<Simbolo> getSymbolTable() {
+        return action_obj.symbolTableManager.getSymbolTable();
+    }
+:}
 
 // Terminals
+terminal IF;
 terminal ASSIG;
 terminal PLUS;
 terminal SUB;
@@ -15,6 +38,34 @@ terminal OPEN_BRACKET;
 terminal CLOSE_BRACKET;
 terminal INTEGER_CONSTANT;
 terminal IDENTIFIER;
+terminal STRING_CONSTANT;
+terminal FLOAT_CONSTANT;
+terminal NEWLINE;
+terminal GREATERTHAN;
+terminal LESSTHAN;
+terminal GREATEREQUAL;
+terminal LESSEQUAL;
+terminal EQUALS;
+terminal NOTEQUALS;
+terminal ELSE;
+terminal LLAVEA;
+terminal LLAVEC;
+terminal DOSPUNTOS;
+terminal COMA;
+terminal INIT;
+terminal INT;
+terminal FLOAT;
+terminal STRING;
+terminal WHILE;
+terminal OR;
+terminal AND;
+terminal NOT;
+terminal WRITE;
+terminal READ;
+terminal UNTIL_LOOP;
+terminal APLICAR_DESC;
+terminal CORCHETE_A;
+terminal CORCHETE_C;
 
 // Non Terminals
 non terminal sentence;
@@ -22,18 +73,262 @@ non terminal assignment;
 non terminal expression;
 non terminal term;
 non terminal factor;
+non terminal program;
+non terminal block;
+non terminal sentence_list;
+non terminal if_statement;
+non terminal condition;
+non terminal relational_op;
+non terminal if;
+non terminal conditional;
+non terminal declarations;
+non terminal declaration;
+non terminal variable_names;
+non terminal name;
+non terminal initi;
+non terminal type;
+non terminal name_init;
+non terminal until_loop_condition;
+non terminal until_loop_operation;
+non terminal discount_amount;
+non terminal discount_list;
+non terminal discount_values;
+non terminal discount_index;
 
-// Start Symbol Definition
-start with sentence;
+program ::= sentence_list
+{: 
+    System.out.println("End"); 
+:}
+| 
+{: 
+    System.out.println("End"); 
+:};
 
-sentence ::= assignment {: System.out.println("End"); :};
-assignment ::= IDENTIFIER ASSIG expression {: System.out.println("Assignment"); :};
+
+sentence_list ::= sentence
+| sentence_list sentence;
+
+
+sentence ::= assignment;
+
+assignment ::= IDENTIFIER:id ASSIG expression:e  
+{: 
+
+    // Verificamos si esta variable está inicializada
+    if (!action_obj.symbolTableManager.containsSymbol(id.toString())) {
+        throw new RuntimeException("La variable '" + id.toString() + "' no esta inicializada.");
+    }
+
+    System.out.println("Assignment"); 
+    System.out.println("Id al cual se asigna: " + id);
+    
+:};
 expression ::= expression PLUS term {: System.out.println("+"); :};
 expression ::= expression SUB term {: System.out.println("-"); :};
 expression ::= term {: System.out.println("Expression = Term"); :};
 term ::= term MULT factor {: System.out.println("*"); :};
 term ::= term DIV factor {: System.out.println("/"); :};
 term ::= factor {: System.out.println("Term = factor"); :};
-factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant ); :};
+
+factor ::= IDENTIFIER:id  
+{: 
+
+    // Verificamos si esta variable está inicializada
+    if (!action_obj.symbolTableManager.containsSymbol(id.toString())) {
+        throw new RuntimeException("La variable '" + id.toString() + "' no esta inicializada.");
+    }
+
+    System.out.println("Id: " + id);
+:};
+
+factor ::= FLOAT_CONSTANT:constant 
+{: 
+    System.out.println("Float Constant: " + constant ); 
+    Simbolo symbol = new Simbolo("_" + constant.toString(), "Int", constant.toString(), constant.toString().length());
+    action_obj.symbolTableManager.addSymbol(symbol);
+
+:};
+
+
+factor ::= INTEGER_CONSTANT:constant 
+{: 
+    System.out.println("Int Constant: " + constant ); 
+    Simbolo symbol = new Simbolo("_" + constant.toString(), "Int", constant.toString(), constant.toString().length());
+    action_obj.symbolTableManager.addSymbol(symbol);
+
+:};
+
+factor ::= STRING_CONSTANT:constant 
+{: 
+    System.out.println("String Constant: " + constant ); 
+    Simbolo symbol = new Simbolo("_" + constant.toString(), "String", constant.toString(), constant.toString().length());
+    action_obj.symbolTableManager.addSymbol(symbol);
+
+:};
+
+
+
+
+
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+
+sentence ::= IF conditional LLAVEA sentence_list LLAVEC ELSE LLAVEA sentence_list LLAVEC 
+{: System.out.println("If - Else"); :}
+|IF conditional LLAVEA sentence_list LLAVEC
+{: System.out.println("If"); :};
+
+conditional ::= OPEN_BRACKET condition CLOSE_BRACKET
+{: System.out.println("conditional"); :}
+| OPEN_BRACKET NOT condition CLOSE_BRACKET
+{: System.out.println("conditional NOT"); :};
+
+condition ::= condition AND factor relational_op factor
+{: System.out.println("condition with AND"); :}
+| condition OR factor relational_op factor
+{: System.out.println("condition with OR"); :}
+| factor relational_op factor
+{: System.out.println("condition"); :};
+
+relational_op ::= GREATERTHAN
+{: System.out.println("Operador relacional mayor"); :}
+| LESSTHAN
+{: System.out.println("Operador relacional menor"); :}
+| GREATEREQUAL
+{: System.out.println("Operador relacional mayor o igual"); :}
+| LESSEQUAL
+{: System.out.println("Operador relacional menor o igual"); :}
+| EQUALS
+{: System.out.println("Operador relacional igual"); :}
+| NOTEQUALS
+{: System.out.println("Operador relacional no igual"); :};
+
+sentence ::= initi 
+{: System.out.println("Se inicializaron las variables"); :};
+
+initi ::= INIT LLAVEA declarations LLAVEC;
+
+declarations ::= declarations declaration;
+declarations ::= declaration;
+
+declaration ::= variable_names DOSPUNTOS type;
+
+variable_names ::= variable_names COMA name_init;
+variable_names ::= name_init;
+
+name_init ::= IDENTIFIER:id
+
+{: 
+    Simbolo symbol = new Simbolo(id.toString(), "", "", 0);
+    this.listaSimbolos.add(symbol);
+    //action_obj.symbolTableManager.addSymbol(symbol);
+    System.out.println("Se inicializo la variable: " + id.toString());
+:};
+
+
+name ::= IDENTIFIER:id
+{: 
+    // Verificamos si esta variable está inicializada
+    if (!action_obj.symbolTableManager.containsSymbol(id.toString())) {
+        throw new RuntimeException("La variable '" + id.toString() + "' no esta inicializada.");
+    }
+:};
+    
+
+type ::= 
+FLOAT
+{: 
+    System.out.println("Se inicializaron todos los datos tipo Float");
+    action_obj.symbolTableManager.addVariablesFromArrayList(this.listaSimbolos, "Float");
+:}
+| INT
+{: 
+    System.out.println("Se inicializaron todos los datos tipo Int");
+    action_obj.symbolTableManager.addVariablesFromArrayList(this.listaSimbolos, "Int");
+:}
+| STRING
+{: 
+    System.out.println("Se inicializaron todos los datos tipo String");
+    action_obj.symbolTableManager.addVariablesFromArrayList(this.listaSimbolos, "String");
+:};
+
+sentence ::= WHILE conditional LLAVEA sentence_list LLAVEC
+{: 
+    System.out.println("Bucle While");
+:};
+
+sentence ::= READ OPEN_BRACKET name CLOSE_BRACKET
+{: 
+    System.out.println("Función Leer");
+:};
+
+sentence ::= WRITE OPEN_BRACKET name CLOSE_BRACKET
+{: 
+    System.out.println("Funcion Escribir");
+:}
+| WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET
+{: 
+    System.out.println("Funcion Escribir");
+:};
+
+
+sentence ::= UNTIL_LOOP OPEN_BRACKET until_loop_condition COMA until_loop_operation CLOSE_BRACKET
+{: 
+    System.out.println("Funcion Until Loop");
+:};
+
+until_loop_condition ::= expression GREATERTHAN expression
+| expression LESSTHAN expression
+| expression GREATEREQUAL expression
+| expression LESSEQUAL expression
+| expression EQUALS expression
+| expression NOTEQUALS expression;
+
+until_loop_operation ::= IDENTIFIER:var EQUALS expression:op;
+
+sentence ::= APLICAR_DESC OPEN_BRACKET discount_amount COMA discount_list COMA discount_index CLOSE_BRACKET
+{: 
+
+    // Verificamos que la lista no esté vacía
+    if (this.cantidadElementos == 0) {
+        System.out.println("Error: la lista de elementos a aplicar descuento está vacía." );
+        throw new RuntimeException("Lista de elementos vacia");
+    }
+
+    // Con la siguiente logica podemos ver si el indice de la funcion descuento es valido.
+    if (this.index >  this.cantidadElementos) {
+        System.out.println("Error: El indice " + index + " es mayor que la cantidad de elementos en la lista de descuentos ("+ this.cantidadElementos + " elementos)." );
+        throw new RuntimeException("Indice fuera de rango");
+    }
+
+    System.out.println("Cantidad de elementos de la lista: " + this.cantidadElementos);
+    System.out.println("Indice funcion aplicar descuento: " + this.index);
+
+    this.cantidadElementos = 0;
+    this.index = 0;
+
+
+    System.out.println("Funcion AplcarDescuento"); 
+:};
+
+discount_amount ::= FLOAT_CONSTANT;
+
+discount_list ::= CORCHETE_A discount_values CORCHETE_C;
+
+discount_values ::= 
+factor
+{: 
+    this.cantidadElementos = this.cantidadElementos + 1;
+:}
+| factor COMA discount_values
+{: 
+    this.cantidadElementos = this.cantidadElementos + 1;
+:}
+| //regla para cuando la lista viene vacia.
+{: 
+
+:};
+
+discount_index ::= INTEGER_CONSTANT:index
+{: 
+    this.index = Integer.parseInt(index.toString());
+:};

@@ -1,1 +1,110 @@
-c=d*(e-21)/4
+
+
+*- Prueba de casos de compilación exitosa -*
+
+*- Inicializacion de variables -*
+
+init {
+    a, b,c : Float
+    a2, b2, var1, base : String
+    a3,x : Int
+}
+
+*- if else -*
+
+si (a > b)
+{
+    escribir("a es mas grande que b")
+}
+sino
+{
+    escribir("a es mas chico o igual a b")
+}
+
+*- if con AND -*
+
+si (a > b AND c > b)
+{
+    
+    escribir("a > b y c > b")
+    
+}
+
+*- if con OR  -*
+
+si (a > b OR c > b)
+{
+    
+    escribir("a > b o c > b")
+    
+}
+
+*- Asignaciones  -*
+
+a := 99999.99
+a := 99.
+a := .9999
+
+b := "@sdADaSjfla%dfg"
+b := "asldk  fh sjf"
+
+*- if con NOT -*
+ 
+si (NOT a > b )
+{
+    
+    escribir("a > b o c > b")
+    
+}
+
+*- Bucle while -*
+
+mientras(a > b) 
+{
+   a := b+1
+}
+
+*- Funcion escribir y leer -*
+
+escribir("ewr")  
+escribir(var1)  
+leer(base)
+
+*- Comentario -*
+
+*- Comentario 
+	con 
+mutliples
+	lineas -*
+
+*- Funcion UntilLoop -*
+x := 0
+UntilLoop(11>x, x=3+x)
+
+*- Funcion aplicarDescuento -*
+aplicarDescuento(27.5, [500, 305, 79.4, 10], 3)  
+
+*- Prueba de casos de compilacion con error -*
+*- Descomentar cada caso para probar -*
+
+*- Int fuera de rango -*
+*- a3 := 999999999 -*
+
+
+*- Float fuera de rango -*
+*-c := 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999.9999999999999999999999999999-*
+
+*- String con más caracteres de los permitidos -*
+*- base := "este es un string con mas de cuarenta caracteres" -*
+
+*- Asignacion de una variable que no ha sido inicializada -*
+*-nuevaVariable := "test" -*
+
+*- Funcion aplicarDescuento con lista vacia -*
+*- aplicarDescuento(27.5, [], 3) -*
+
+*- Funcion aplicarDescuento con indice mayor a la cantidad de elementos de la lista -*
+*- aplicarDescuento(27.5, [500, 305], 5) -*
+
+*- Caracter invalido: -*
+*- # -*
