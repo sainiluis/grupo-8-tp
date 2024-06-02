@@ -1,11 +1,9 @@
-
-
 *- Prueba de casos de compilación exitosa -*
 
 *- Inicializacion de variables -*
 
 init {
-    a, b,c : Float
+    a, b,c,d : Float
     a2, b2, var1, base : String
     a3,x : Int
 }
@@ -14,11 +12,11 @@ init {
 
 si (a > b)
 {
-    escribir("a es mas grande que b")
+    a := 4
 }
 sino
 {
-    escribir("a es mas chico o igual a b")
+    c := 4
 }
 
 *- if con AND -*

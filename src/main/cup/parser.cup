@@ -7,7 +7,12 @@ import java.util.List;
 
 import java_cup.runtime.*;
 import lyc.compiler.symbol_table.*;
+import lyc.compiler.gci.*;
 import lyc.compiler.model.*;
+import lyc.compiler.files.*;
+
+
+import java.util.Stack;
 
 
 class Parser;
@@ -16,8 +21,41 @@ action code
 {:
     public SymbolTableManager symbolTableManager = new SymbolTableManager();
     public ArrayList<Simbolo> listaSimbolos = new ArrayList<>();
+    
+    public ArrayList<Terceto> listaTercetos = new ArrayList<>();
+    public IntermediateCodeGenerator intermediateCode = new IntermediateCodeGenerator(listaTercetos);
+    public TercetosHandler tercetosHandler = new TercetosHandler();
     public int cantidadElementos = 0;
     public int index = 0;
+    public int indexTerceto = 1;
+    public String op_relacional = "";
+    public int terceto_salto = 0;
+
+    public Stack<String> factorStack = new Stack<>();
+
+    public Stack<String> conditionsStack = new Stack<>();
+
+    public Stack<Integer> tercetoStack = new Stack<>();
+
+    public int nro_label = 1;
+
+    public boolean isIfElse = false;
+
+    public int tercetoConditional;
+
+    public boolean isWhile = false;
+    
+    public String montoDescuento;
+    public int indiceDescuento;
+
+    public int cont_cantidad_variables;
+
+    public boolean flagOneSentence = false;
+
+    List<String> elementosDesapilados = new ArrayList<>();
+
+    public int lastCondition;
+
 :}
 
 parser code
@@ -25,6 +63,12 @@ parser code
     public ArrayList<Simbolo> getSymbolTable() {
         return action_obj.symbolTableManager.getSymbolTable();
     }
+
+    public ArrayList<Terceto> getIntermediateCode() {
+        return action_obj.tercetosHandler.getIntermediateCode();
+    }
+
+    
 :}
 
 // Terminals
@@ -74,7 +118,6 @@ non terminal expression;
 non terminal term;
 non terminal factor;
 non terminal program;
-non terminal block;
 non terminal sentence_list;
 non terminal if_statement;
 non terminal condition;
@@ -94,6 +137,7 @@ non terminal discount_amount;
 non terminal discount_list;
 non terminal discount_values;
 non terminal discount_index;
+non terminal sentence_list_negative;
 
 program ::= sentence_list
 {: 
@@ -105,11 +149,34 @@ program ::= sentence_list
 :};
 
 
-sentence_list ::= sentence
-| sentence_list sentence;
+sentence_list ::=
+sentence
+{:
+    if(isIfElse) {
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "go_to", "label" + Integer.toString(nro_label+1), ""));
+        isIfElse = false;
+
+        indexTerceto++;
+
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "label", "label" + Integer.toString(nro_label), ""));
+        nro_label++;
+        indexTerceto++;
+
+        flagOneSentence = false;
+    }
+
+    
+:}
+| sentence_list sentence
+{:
+:};
 
 
 sentence ::= assignment;
+
+
 
 assignment ::= IDENTIFIER:id ASSIG expression:e  
 {: 
@@ -121,14 +188,62 @@ assignment ::= IDENTIFIER:id ASSIG expression:e
 
     System.out.println("Assignment"); 
     System.out.println("Id al cual se asigna: " + id);
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, ":=", id.toString(), "terceto_" + Integer.toString(action_obj.tercetosHandler.obtenerIndice("expression"))));
+    action_obj.tercetosHandler.agregarIndice("assignment", indexTerceto);
+    indexTerceto++;
     
 :};
-expression ::= expression PLUS term {: System.out.println("+"); :};
-expression ::= expression SUB term {: System.out.println("-"); :};
-expression ::= term {: System.out.println("Expression = Term"); :};
-term ::= term MULT factor {: System.out.println("*"); :};
-term ::= term DIV factor {: System.out.println("/"); :};
-term ::= factor {: System.out.println("Term = factor"); :};
+
+expression ::= expression PLUS term 
+{: 
+    System.out.println("+");
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "+", "terceto_" + Integer.toString(action_obj.tercetosHandler.obtenerIndice("expression")), "terceto_" + Integer.toString(action_obj.tercetosHandler.obtenerIndice("term"))));
+    action_obj.tercetosHandler.agregarIndice("expression", indexTerceto);
+    indexTerceto++;
+:};
+
+expression ::= expression SUB term 
+{: 
+    System.out.println("-");
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "-", Integer.toString(action_obj.tercetosHandler.obtenerIndice("expression")), Integer.toString(action_obj.tercetosHandler.obtenerIndice("term"))));
+    action_obj.tercetosHandler.agregarIndice("expression", indexTerceto);
+    indexTerceto++;
+
+:};
+
+expression ::= term 
+{: 
+    System.out.println("Expression = Term"); 
+    action_obj.tercetosHandler.apuntarAOtroIndice("expression", "term");
+
+:};
+
+term ::= term MULT factor 
+{: 
+    System.out.println("*");
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "*", Integer.toString(action_obj.tercetosHandler.obtenerIndice("term")), Integer.toString(action_obj.tercetosHandler.obtenerIndice("factor"))));
+    action_obj.tercetosHandler.agregarIndice("term", indexTerceto);
+    indexTerceto++;
+:};
+
+term ::= term DIV factor 
+{: 
+    System.out.println("/");
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "/", Integer.toString(action_obj.tercetosHandler.obtenerIndice("term")), Integer.toString(action_obj.tercetosHandler.obtenerIndice("factor"))));
+    action_obj.tercetosHandler.agregarIndice("term", indexTerceto);
+    indexTerceto++;
+
+:};
+term ::= factor 
+{: 
+    System.out.println("Term = factor"); 
+    action_obj.tercetosHandler.apuntarAOtroIndice("term", "factor");
+:};
 
 factor ::= IDENTIFIER:id  
 {: 
@@ -139,6 +254,15 @@ factor ::= IDENTIFIER:id
     }
 
     System.out.println("Id: " + id);
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, id.toString(), "_","_"));
+
+    action_obj.tercetosHandler.agregarIndice("factor", indexTerceto);
+
+    indexTerceto++;
+
+    // apilo, luego me servirá si debo usar este elemento en alguna condicion
+    factorStack.push(id.toString());
 :};
 
 factor ::= FLOAT_CONSTANT:constant 
@@ -146,6 +270,16 @@ factor ::= FLOAT_CONSTANT:constant
     System.out.println("Float Constant: " + constant ); 
     Simbolo symbol = new Simbolo("_" + constant.toString(), "Int", constant.toString(), constant.toString().length());
     action_obj.symbolTableManager.addSymbol(symbol);
+
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, constant.toString(), "_","_"));
+
+    action_obj.tercetosHandler.agregarIndice("factor", indexTerceto);
+
+    indexTerceto++;
+
+    // apilo, luego me servirá si debo usar este elemento en alguna condicion
+    factorStack.push(constant.toString());
 
 :};
 
@@ -156,6 +290,16 @@ factor ::= INTEGER_CONSTANT:constant
     Simbolo symbol = new Simbolo("_" + constant.toString(), "Int", constant.toString(), constant.toString().length());
     action_obj.symbolTableManager.addSymbol(symbol);
 
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, constant.toString(), "_","_"));
+
+    action_obj.tercetosHandler.agregarIndice("factor", indexTerceto);
+
+    indexTerceto++;
+
+    // apilo, luego me servirá si debo usar este elemento en alguna condicion
+    factorStack.push(constant.toString());
+
 :};
 
 factor ::= STRING_CONSTANT:constant 
@@ -163,6 +307,15 @@ factor ::= STRING_CONSTANT:constant
     System.out.println("String Constant: " + constant ); 
     Simbolo symbol = new Simbolo("_" + constant.toString(), "String", constant.toString(), constant.toString().length());
     action_obj.symbolTableManager.addSymbol(symbol);
+
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, constant.toString(), "_","_"));
+
+    action_obj.tercetosHandler.agregarIndice("factor", indexTerceto);
+    indexTerceto++;
+
+    // apilo, luego me servirá si debo usar este elemento en alguna condicion
+    factorStack.push(constant.toString());
 
 :};
 
@@ -173,37 +326,133 @@ factor ::= STRING_CONSTANT:constant
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
 
 sentence ::= IF conditional LLAVEA sentence_list LLAVEC ELSE LLAVEA sentence_list LLAVEC 
-{: System.out.println("If - Else"); :}
+{: 
+    System.out.println("If - Else");
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "label", "label" + Integer.toString(nro_label), ""));
+    nro_label++;
+    indexTerceto++;
+
+:}
 |IF conditional LLAVEA sentence_list LLAVEC
-{: System.out.println("If"); :};
+{: 
+    System.out.println("If");
+
+    action_obj.tercetosHandler.quitarUltimoGoTo();
+    indexTerceto--;
+:};
+
+sentence_list_negative ::= 
+sentence
+| sentence_list sentence;
 
 conditional ::= OPEN_BRACKET condition CLOSE_BRACKET
-{: System.out.println("conditional"); :}
+{: 
+
+    System.out.println("conditional"); 
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "if_true", "terceto_" + Integer.toString(indexTerceto-1),"label" + Integer.toString(nro_label)));
+
+    indexTerceto++;
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "go_to", "label" + Integer.toString(nro_label+1), ""));
+
+    indexTerceto++;
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "label", "label" + Integer.toString(nro_label), ""));
+
+    nro_label++;
+    indexTerceto++;
+
+    isIfElse = true;
+
+
+    System.out.println("condition");    
+:}
 | OPEN_BRACKET NOT condition CLOSE_BRACKET
-{: System.out.println("conditional NOT"); :};
+{: 
+    System.out.println("conditional NOT"); 
+    action_obj.tercetosHandler.reemplazarOperadorUltimoIfTrue("if_not_true");
+    
+:};
 
 condition ::= condition AND factor relational_op factor
-{: System.out.println("condition with AND"); :}
+{: 
+    System.out.println("condition with AND");
+
+    String factorDerecha = factorStack.pop();
+    String factorIzquierda = factorStack.pop();
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, op_relacional, factorIzquierda, factorDerecha));
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "AND","terceto_" + Integer.toString(lastCondition), "terceto_" + Integer.toString(indexTerceto-1)));
+    tercetoConditional = indexTerceto;
+    indexTerceto++;
+    
+:}
 | condition OR factor relational_op factor
+{:
+    String factorDerecha = factorStack.pop();
+    String factorIzquierda = factorStack.pop();
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, op_relacional, factorIzquierda, factorDerecha));
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "OR","terceto_" + Integer.toString(lastCondition), "terceto_" + Integer.toString(indexTerceto-1)));
+    tercetoConditional = indexTerceto;
+    indexTerceto++;
+:}
+
+
 {: System.out.println("condition with OR"); :}
-| factor relational_op factor
-{: System.out.println("condition"); :};
+| 
+factor relational_op factor{: 
+
+    String factorDerecha = factorStack.pop();
+    String factorIzquierda = factorStack.pop();
+
+    lastCondition = indexTerceto;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, op_relacional, factorIzquierda, factorDerecha));
+    tercetoConditional = indexTerceto;
+    indexTerceto++;
+    
+    
+:};
 
 relational_op ::= GREATERTHAN
-{: System.out.println("Operador relacional mayor"); :}
+{: 
+    System.out.println("Operador relacional mayor");
+    op_relacional = ">";
+:}
 | LESSTHAN
-{: System.out.println("Operador relacional menor"); :}
+{: 
+    System.out.println("Operador relacional menor");
+    op_relacional = "<"; 
+:}
 | GREATEREQUAL
-{: System.out.println("Operador relacional mayor o igual"); :}
+{: 
+    System.out.println("Operador relacional mayor o igual");
+    op_relacional = ">="; 
+:}
 | LESSEQUAL
-{: System.out.println("Operador relacional menor o igual"); :}
+{: 
+    System.out.println("Operador relacional menor o igual"); 
+    op_relacional = "<=";
+:}
 | EQUALS
-{: System.out.println("Operador relacional igual"); :}
+{: 
+    System.out.println("Operador relacional igual");
+    op_relacional = "=";
+:}
 | NOTEQUALS
-{: System.out.println("Operador relacional no igual"); :};
+{: 
+    System.out.println("Operador relacional no igual"); 
+    op_relacional = "!=";
+:};
 
 sentence ::= initi 
-{: System.out.println("Se inicializaron las variables"); :};
+{: 
+    System.out.println("Se inicializaron las variables"); 
+:};
 
 initi ::= INIT LLAVEA declarations LLAVEC;
 
@@ -222,6 +471,10 @@ name_init ::= IDENTIFIER:id
     this.listaSimbolos.add(symbol);
     //action_obj.symbolTableManager.addSymbol(symbol);
     System.out.println("Se inicializo la variable: " + id.toString());
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "INIT", id.toString(),"_"));
+    action_obj.tercetosHandler.agregarIndice("name_init", indexTerceto);
+    indexTerceto++;
 :};
 
 
@@ -231,57 +484,79 @@ name ::= IDENTIFIER:id
     if (!action_obj.symbolTableManager.containsSymbol(id.toString())) {
         throw new RuntimeException("La variable '" + id.toString() + "' no esta inicializada.");
     }
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, id.toString(), "_" , "_"));
+    action_obj.tercetosHandler.agregarIndice("name", indexTerceto);
+    indexTerceto++;
+
+
 :};
-    
 
 type ::= 
 FLOAT
 {: 
     System.out.println("Se inicializaron todos los datos tipo Float");
     action_obj.symbolTableManager.addVariablesFromArrayList(this.listaSimbolos, "Float");
+    action_obj.tercetosHandler.agregarIndice("type", indexTerceto);
+    action_obj.tercetosHandler.agregarTipoDeVariableInit("float");
 :}
 | INT
 {: 
     System.out.println("Se inicializaron todos los datos tipo Int");
     action_obj.symbolTableManager.addVariablesFromArrayList(this.listaSimbolos, "Int");
+    action_obj.tercetosHandler.agregarIndice("type", indexTerceto);
+    action_obj.tercetosHandler.agregarTipoDeVariableInit("int");
 :}
 | STRING
 {: 
     System.out.println("Se inicializaron todos los datos tipo String");
     action_obj.symbolTableManager.addVariablesFromArrayList(this.listaSimbolos, "String");
+    action_obj.tercetosHandler.agregarIndice("type", indexTerceto);
+    action_obj.tercetosHandler.agregarTipoDeVariableInit("string");
 :};
 
 sentence ::= WHILE conditional LLAVEA sentence_list LLAVEC
 {: 
     System.out.println("Bucle While");
+
+    action_obj.tercetosHandler.modificarUltimoGoTo("terceto_" + Integer.toString(tercetoConditional));
+
+    
 :};
 
 sentence ::= READ OPEN_BRACKET name CLOSE_BRACKET
 {: 
     System.out.println("Función Leer");
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "READ_INPUT", "@aux" , "_"));
+    action_obj.tercetosHandler.agregarIndice("sentence", indexTerceto);
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, ":=", Integer.toString(action_obj.tercetosHandler.obtenerIndice("name")) , "@aux"));
+    indexTerceto++;
 :};
 
 sentence ::= WRITE OPEN_BRACKET name CLOSE_BRACKET
 {: 
     System.out.println("Funcion Escribir");
 :}
-| WRITE OPEN_BRACKET STRING_CONSTANT CLOSE_BRACKET
+| WRITE OPEN_BRACKET STRING_CONSTANT:sc CLOSE_BRACKET
 {: 
     System.out.println("Funcion Escribir");
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "WRITE", "" + sc.toString() + "", ""));
+    action_obj.tercetosHandler.agregarIndice("sentence", indexTerceto);
+    indexTerceto++;
+
 :};
 
 
 sentence ::= UNTIL_LOOP OPEN_BRACKET until_loop_condition COMA until_loop_operation CLOSE_BRACKET
 {: 
     System.out.println("Funcion Until Loop");
+    isWhile = true;
 :};
 
-until_loop_condition ::= expression GREATERTHAN expression
-| expression LESSTHAN expression
-| expression GREATEREQUAL expression
-| expression LESSEQUAL expression
-| expression EQUALS expression
-| expression NOTEQUALS expression;
+until_loop_condition ::= condition;
 
 until_loop_operation ::= IDENTIFIER:var EQUALS expression:op;
 
@@ -300,24 +575,123 @@ sentence ::= APLICAR_DESC OPEN_BRACKET discount_amount COMA discount_list COMA d
         throw new RuntimeException("Indice fuera de rango");
     }
 
+
+
     System.out.println("Cantidad de elementos de la lista: " + this.cantidadElementos);
     System.out.println("Indice funcion aplicar descuento: " + this.index);
 
     this.cantidadElementos = 0;
     this.index = 0;
 
+    while (!factorStack.isEmpty()) {
+        String elemento = factorStack.pop();
+        if (elemento.equals("--")) {
+            break;
+        } else {
+            elementosDesapilados.add(0, elemento);
+        }
+    }
+
+    int cantidad_elementos = 0; 
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=" , "@cont","0"));
+    indexTerceto++;
+
+    for (String elemento : elementosDesapilados) {
+        cantidad_elementos++;
+        
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=" , "@cont","@cont + 1"));
+        indexTerceto++;
+        System.out.println("Elemento desapilado nro "+ Integer.toString(cantidad_elementos) + " " + elemento);
+        
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=", "@var"+ Integer.toString(cantidad_elementos) ,elemento));
+        indexTerceto++;
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,">", "@cont" ,"@indice"));
+        indexTerceto++;
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"if_true", "terceto_" +Integer.toString(indexTerceto-1) , "label" + Integer.toString(nro_label+1)));
+        indexTerceto++;
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"-", "@var"+ Integer.toString(cantidad_elementos) , "@montoDesc"));
+        indexTerceto++;
+        
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=", "@resultadoValor"+ Integer.toString(cantidad_elementos) , "terceto_" + Integer.toString(indexTerceto-1)));
+        indexTerceto++;
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"go_to", "label"+ Integer.toString(nro_label+2) , "_"));
+        indexTerceto++;
+
+        nro_label++;
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"label", "label" + Integer.toString(nro_label) , ""));
+        indexTerceto++;
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"*", "@var"+ Integer.toString(cantidad_elementos) , "@auxDesc"));
+        indexTerceto++;
+
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=", "@resultadoValor"+ Integer.toString(cantidad_elementos) , "terceto_" + Integer.toString(indexTerceto-1)));
+        indexTerceto++;
+
+        nro_label++;
+        action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"label", "label"+ Integer.toString(nro_label) , "_"));
+        indexTerceto++;
+
+    }
+
 
     System.out.println("Funcion AplcarDescuento"); 
 :};
 
-discount_amount ::= FLOAT_CONSTANT;
+discount_amount ::= INTEGER_CONSTANT:c
+{: 
+    montoDescuento = c.toString();
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,"@montoDesc" , c.toString(),"_"));
+    action_obj.tercetosHandler.agregarIndice("discount_amount", indexTerceto);
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "/", "@montoDesc" , "100"));
+    indexTerceto++;
+    
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "-", "1" , "terceto_" + Integer.toString(indexTerceto-1)));
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, ":=", "@auxDesc" , "terceto_" + Integer.toString(indexTerceto-1)));
+    indexTerceto++;
+
+    factorStack.push("--");
+
+:}
+| FLOAT_CONSTANT:c
+{: 
+    montoDescuento = c.toString();
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=", "@montoDesc",c.toString()));
+    action_obj.tercetosHandler.agregarIndice("discount_amount", indexTerceto);
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "/", "@montoDesc" , "100"));
+    indexTerceto++;
+    
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, "-", "1" , "terceto_" + Integer.toString(indexTerceto-1)));
+    indexTerceto++;
+
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto, ":=", "@auxDesc" , "terceto_" + Integer.toString(indexTerceto-1)));
+    indexTerceto++;
+
+    factorStack.push("--");
+:}
+;
 
 discount_list ::= CORCHETE_A discount_values CORCHETE_C;
 
 discount_values ::= 
 factor
 {: 
+
     this.cantidadElementos = this.cantidadElementos + 1;
+    
+
 :}
 | factor COMA discount_values
 {: 
@@ -330,5 +704,10 @@ factor
 
 discount_index ::= INTEGER_CONSTANT:index
 {: 
+    indiceDescuento = Integer.parseInt(index.toString());
+
     this.index = Integer.parseInt(index.toString());
+    action_obj.tercetosHandler.agregarTerceto(new Terceto(indexTerceto,":=","@indice",index.toString()));
+    action_obj.tercetosHandler.agregarIndice("discount_index", indexTerceto);
+    indexTerceto++;
 :};
