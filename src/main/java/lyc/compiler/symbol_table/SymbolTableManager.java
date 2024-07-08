@@ -4,6 +4,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SymbolTableManager {
 
@@ -47,6 +49,25 @@ public class SymbolTableManager {
             }
         }
         return false;
+    }
+
+    public boolean haySimbolosDuplicados() {
+        Set<String> nombreDeSimbolos = new HashSet<>();
+        for (Simbolo symbol : symbolTable) {
+            if (!nombreDeSimbolos.add(symbol.getNombre())) {
+                return true; 
+            }
+        }
+        return false;
+    }
+
+    public String getTipoDeSimbolo(String nombreSimbolo) {
+        for (Simbolo symbol : symbolTable) {
+            if (symbol.getNombre().equals(nombreSimbolo)) {
+                return symbol.getTipoDato();
+            }
+        }
+        return null;
     }
 
     

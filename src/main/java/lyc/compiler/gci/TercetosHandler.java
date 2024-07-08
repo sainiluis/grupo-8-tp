@@ -128,4 +128,41 @@ public class TercetosHandler {
         }
     }
 
+    public void saltarAlTercetoDesapilado(int numeroDeTerceto, int valor) {
+        
+        for (Terceto terceto : tercetos) {
+            if (terceto.getIndice() == numeroDeTerceto) {
+                terceto.setElemento1("[" + Integer.toString(valor) + "]");
+                return; 
+            }
+        }
+    }
+
+    public void crearNuevoTerceto(int index, String operador, String elemento1, String elemento2) {
+        Terceto nuevoTerceto = new Terceto(index, operador, elemento1, elemento2);
+        
+        if (index >= tercetos.size()) {
+            tercetos.add(nuevoTerceto);
+        } else {
+            tercetos.add(index, nuevoTerceto);
+        }
+        
+        reorganizarIndices();
+    }
+
+    private void reorganizarIndices() {
+        for (int i = 0; i < tercetos.size(); i++) {
+            tercetos.get(i).setIndice(i + 1); 
+        }
+    }
+
+    public String getOperadorPorIndice(int indiceTerceto) {
+        for (Terceto terceto : tercetos) {
+            if (terceto.getIndice() == indiceTerceto) {
+                return terceto.getOperador();
+            }
+        }
+        return null; 
+    }
+
 }

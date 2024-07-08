@@ -3,20 +3,37 @@
 *- Inicializacion de variables -*
 
 init {
-    a, b,c,d : Float
+    a, b,c,d,x : Int
     a2, b2, var1, base : String
-    a3,x : Int
+    a3 : Int
+    a4 : Float
 }
 
-*- if else -*
+a := 10
+a3 := 10
+
+
+*- if simple-*
 
 si (a > b)
 {
     a := 4
 }
-sino
+
+*- if con else -*
+
+si (a > a3)
 {
-    c := 4
+    escribir("a es mayor que a3")
+} sino {
+    escribir("a es menor o igual que a3")
+}
+
+si (NOT a > b )
+{
+    
+    escribir("prueba")
+    
 }
 
 *- if con AND -*
@@ -24,7 +41,7 @@ sino
 si (a > b AND c > b)
 {
     
-    escribir("a > b y c > b")
+    escribir("prueba")
     
 }
 
@@ -33,40 +50,30 @@ si (a > b AND c > b)
 si (a > b OR c > b)
 {
     
-    escribir("a > b o c > b")
+    escribir("prueba")
     
 }
 
 *- Asignaciones  -*
 
-a := 99999.99
-a := 99.
-a := .9999
+a4 := 99999.99
+a4 := 99.
+a4 := .9999
 
-b := "@sdADaSjfla%dfg"
-b := "asldk  fh sjf"
 
-*- if con NOT -*
- 
-si (NOT a > b )
-{
-    
-    escribir("a > b o c > b")
-    
-}
 
 *- Bucle while -*
 
-mientras(a > b) 
+a:=1
+
+mientras(a > 3) 
 {
-   a := b+1
+   escribir("a es menor que 3")
 }
 
 *- Funcion escribir y leer -*
 
-escribir("ewr")  
-escribir(var1)  
-leer(base)
+escribir("ewr")
 
 *- Comentario -*
 
@@ -77,10 +84,10 @@ mutliples
 
 *- Funcion UntilLoop -*
 x := 0
-UntilLoop(11>x, x=3+x)
+*- UntilLoop(11>x, x=3+x) -*
 
 *- Funcion aplicarDescuento -*
-aplicarDescuento(27.5, [500, 305, 79.4, 10], 3)  
+*- aplicarDescuento(28, [500, 305, 79.4, 10], 3) -*
 
 *- Prueba de casos de compilacion con error -*
 *- Descomentar cada caso para probar -*
@@ -88,6 +95,7 @@ aplicarDescuento(27.5, [500, 305, 79.4, 10], 3)
 *- Int fuera de rango -*
 *- a3 := 999999999 -*
 
+a:=1
 
 *- Float fuera de rango -*
 *-c := 999999999999999999999999999999999999999999999999999999999999999999999999999999999999999.9999999999999999999999999999-*
@@ -104,5 +112,4 @@ aplicarDescuento(27.5, [500, 305, 79.4, 10], 3)
 *- Funcion aplicarDescuento con indice mayor a la cantidad de elementos de la lista -*
 *- aplicarDescuento(27.5, [500, 305], 5) -*
 
-*- Caracter invalido: -*
-*- # -*
+

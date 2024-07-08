@@ -6,6 +6,7 @@ import lyc.compiler.factories.ParserFactory;
 import lyc.compiler.files.FileOutputWriter;
 import lyc.compiler.files.*;
 import lyc.compiler.symbol_table.*;
+import lyc.compiler.asm.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -25,8 +26,8 @@ public final class Compiler {
             parser.parse();
             FileOutputWriter.writeOutput("symbol-table.txt", new SymbolTableGenerator(parser.getSymbolTable()));
             FileOutputWriter.writeOutput("intermediate-code.txt", new IntermediateCodeGenerator(parser.getIntermediateCode()));
-            FileOutputWriter.writeOutput("final.asm", new AsmCodeGenerator()); 
-        } catch (IOException e) {
+            FileOutputWriter.writeOutput("final.asm", new AsmCodeGenerator(parser.getAsmInstructions())); 
+        } catch (IOException e) { 
             System.err.println("There was an error trying to read input file " + e.getMessage());
             System.exit(0);
         } catch (Exception e) {
